@@ -2,8 +2,9 @@
   import { env } from './env'
   import { onMount } from 'svelte'
   import { open } from '@tauri-apps/api/shell'
+  import TimerPanel from './lib/components/TimerPanel.svelte';
   let online = true
-  const version = __APP_VERSION__ ?? '1.0.0'
+  const version = '1.0.0'
 
   function HelpIcon() {
     // placeholder noop to satisfy TS when inlining SVG in slot
@@ -33,6 +34,11 @@
     <h1 class="text-xl font-semibold tracking-tight">Tauri Application</h1>
     <p class="mt-2 text-sm text-zinc-400">Ready to build something amazing</p>
   </section>
+  <!-- TimerPanel: system tray timer demo -->
+  <section class="mt-8">
+    <TimerPanel />
+  </section>
+  import TimerPanel from './lib/components/TimerPanel.svelte';
 
   <!-- Footer -->
   <footer class="fixed bottom-2 inset-x-0 text-center text-[11px] text-zinc-500">

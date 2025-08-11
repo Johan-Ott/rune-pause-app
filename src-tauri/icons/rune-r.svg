@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nordisk runa för R (Raidho) - ᚱ -->
+  <!-- Vertikal linje till vänster -->
+  <line x1="8" y1="4" x2="8" y2="28" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Övre horisontella linje -->
+  <line x1="8" y1="4" x2="18" y2="4" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Diagonal från mitten av vänster linje till höger ner -->
+  <line x1="8" y1="16" x2="20" y2="28" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Vertikal linje från övre höger hörn ner till mitten -->
+  <line x1="18" y1="4" x2="18" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Horisontell linje som förbinder mitt-punkterna -->
+  <line x1="8" y1="16" x2="18" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

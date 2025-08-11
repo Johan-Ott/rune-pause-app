@@ -1,0 +1,471 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cinzel:wght@400;500&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 14px;
+  --background: #f8f9fb;
+  --foreground: #1a2332;
+  --card: #ffffff;
+  --card-foreground: #1a2332;
+  --popover: #ffffff;
+  --popover-foreground: #1a2332;
+  --primary: #2c5282;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #2c5282;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #3182ce;
+  --accent-foreground: #ffffff;
+  --destructive: #e53e3e;
+  --destructive-foreground: #ffffff;
+  --border: rgba(45, 82, 130, 0.1);
+  --input: transparent;
+  --input-background: #f1f5f9;
+  --switch-background: #cbd5e0;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #3182ce;
+  --chart-1: #2c5282;
+  --chart-2: #38a169;
+  --chart-3: #d69e2e;
+  --chart-4: #805ad5;
+  --chart-5: #e53e3e;
+  --radius: 0.75rem;
+  --sidebar: #f8f9fb;
+  --sidebar-foreground: #1a2332;
+  --sidebar-primary: #2c5282;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2e8f0;
+  --sidebar-accent-foreground: #2c5282;
+  --sidebar-border: rgba(45, 82, 130, 0.1);
+  --sidebar-ring: #3182ce;
+  
+  /* Nordic theme colors */
+  --nordic-primary: #2c5282;
+  --nordic-secondary: #38a169;
+  --nordic-accent: #d69e2e;
+  --nordic-dark: #1a202c;
+  --nordic-light: #f7fafc;
+  --nordic-mist: rgba(45, 82, 130, 0.05);
+  
+  /* Enhanced nordic colors for better contrast */
+  --nordic-blue: #4a90e2;
+  --nordic-green: #7ed321;
+  --nordic-purple: #9013fe;
+  --nordic-gradient-start: #667eea;
+  --nordic-gradient-end: #764ba2;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    @apply text-foreground min-h-screen transition-colors duration-300;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+    background-attachment: fixed;
+  }
+
+  .runic-font {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+/**
+ * Base typography - modern and clean
+ */
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1 {
+      font-size: 2rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.4;
+      letter-spacing: -0.025em;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.4;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.4;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-normal);
+      line-height: 1.6;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Clean glasmorfism - ljust minimalistiskt tema */
+@layer utilities {
+  /* Ljus, ren glaseffekt för huvudkomponenter */
+  .glass-clean {
+    backdrop-filter: blur(12px) saturate(120%);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Subtil glaseffekt för mindre element */
+  .glass-subtle {
+    backdrop-filter: blur(8px) saturate(110%);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 
+      0 2px 12px rgba(0, 0, 0, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Stark glaseffekt för viktiga element */
+  .glass-strong {
+    backdrop-filter: blur(16px) saturate(130%);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+  
+  /* NATTHIMMEL THEME - för pausskärmar */
+  .night-sky-background {
+    background: 
+      radial-gradient(ellipse at top, #1e3a8a 0%, #0f172a 50%, #1a365d 100%),
+      radial-gradient(ellipse at 70% 20%, #312e81 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, #1e1b4b 0%, transparent 60%);
+    background-size: 100% 100%, 60% 40%, 40% 30%;
+    position: relative;
+  }
+
+  /* Dynamiska stjärnor */
+  .stars-animated {
+    background: 
+      radial-gradient(1px 1px at 25% 30%, rgba(255, 255, 255, 0.9), transparent),
+      radial-gradient(1px 1px at 75% 70%, rgba(255, 255, 255, 0.7), transparent),
+      radial-gradient(1px 1px at 50% 20%, rgba(255, 255, 255, 0.8), transparent),
+      radial-gradient(2px 2px at 80% 40%, rgba(147, 197, 253, 0.6), transparent),
+      radial-gradient(1px 1px at 30% 80%, rgba(255, 255, 255, 0.6), transparent),
+      radial-gradient(1px 1px at 90% 15%, rgba(34, 197, 94, 0.5), transparent),
+      radial-gradient(2px 2px at 15% 60%, rgba(168, 85, 247, 0.4), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  /* Natthimmel glaseffekter */
+  .night-glass-cosmic {
+    backdrop-filter: blur(24px) saturate(130%);
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(147, 197, 253, 0.3);
+    box-shadow: 
+      0 16px 48px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 32px rgba(147, 197, 253, 0.1);
+  }
+
+  .night-glass-mystical {
+    backdrop-filter: blur(20px) saturate(120%);
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .night-glass-ethereal {
+    backdrop-filter: blur(16px) saturate(110%);
+    background: rgba(51, 65, 85, 0.3);
+    border: 1px solid rgba(147, 197, 253, 0.15);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Shimmer animation för magisk känsla */
+  .night-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .night-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(147, 197, 253, 0.1),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* Hover-effekter */
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-1px);
+    box-shadow: 
+      0 8px 28px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    transition: all 0.2s ease;
+  }
+
+  .night-hover:hover {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: rgba(147, 197, 253, 0.4);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 24px rgba(147, 197, 253, 0.2);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+
+  /* Aurora-effekter för magiska element */
+  .aurora-glow {
+    box-shadow: 
+      0 0 20px rgba(147, 197, 253, 0.3),
+      0 0 40px rgba(34, 197, 94, 0.2),
+      0 0 60px rgba(168, 85, 247, 0.1);
+    animation: aurora-pulse 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora-pulse {
+    0% {
+      box-shadow: 
+        0 0 20px rgba(147, 197, 253, 0.3),
+        0 0 40px rgba(34, 197, 94, 0.2),
+        0 0 60px rgba(168, 85, 247, 0.1);
+    }
+    50% {
+      box-shadow: 
+        0 0 30px rgba(147, 197, 253, 0.5),
+        0 0 60px rgba(34, 197, 94, 0.3),
+        0 0 90px rgba(168, 85, 247, 0.2);
+    }
+    100% {
+      box-shadow: 
+        0 0 20px rgba(147, 197, 253, 0.3),
+        0 0 40px rgba(34, 197, 94, 0.2),
+        0 0 60px rgba(168, 85, 247, 0.1);
+    }
+  }
+
+  /* Form element styling */
+  .nordic-slider [data-orientation="horizontal"] {
+    background: rgba(226, 232, 240, 0.8);
+    border-radius: 9999px;
+    height: 4px;
+  }
+
+  .nordic-slider [data-orientation="horizontal"] [data-slider-track] {
+    background: linear-gradient(90deg, var(--nordic-blue), var(--nordic-green));
+    border-radius: 9999px;
+    height: 4px;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
+  }
+
+  .nordic-slider [data-orientation="horizontal"] [data-slider-thumb] {
+    background: white;
+    border: 2px solid var(--nordic-blue);
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .nordic-slider [data-orientation="horizontal"] [data-slider-thumb]:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+  }
+
+  /* Switch styling */
+  .nordic-switch[data-state="checked"] {
+    background: linear-gradient(135deg, var(--nordic-blue), var(--nordic-green)) !important;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+  }
+
+  .nordic-switch[data-state="unchecked"] {
+    background: rgba(226, 232, 240, 0.8) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  /* Select and input */
+  .nordic-select {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    color: #1a2332 !important;
+    border-radius: 0.5rem;
+  }
+
+  .nordic-select:focus {
+    border-color: rgba(74, 144, 226, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1) !important;
+  }
+
+  .nordic-select option {
+    background: white !important;
+    color: #1a2332 !important;
+  }
+
+  /* Button variants */
+  .btn-nordic-primary {
+    background: linear-gradient(135deg, var(--nordic-blue), var(--nordic-purple));
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
+  }
+
+  .btn-nordic-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.4);
+  }
+
+  .btn-nordic-secondary {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--nordic-primary);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .btn-nordic-secondary:hover {
+    background: rgba(74, 144, 226, 0.1);
+    border-color: var(--nordic-blue);
+    transform: translateY(-1px);
+  }
+
+  /* Utility classes för layout */
+  .nordic-container {
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  .nordic-spacing-sm { gap: 0.5rem; }
+  .nordic-spacing-md { gap: 1rem; }
+  .nordic-spacing-lg { gap: 1.5rem; }
+  .nordic-spacing-xl { gap: 2rem; }
+
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.9); 
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+
+  /* Responsive design */
+  @media (max-width: 640px) {
+    .nordic-container {
+      max-width: 100%;
+      padding: 0.75rem;
+    }
+    
+    .btn-nordic-primary,
+    .btn-nordic-secondary {
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+  }
+}

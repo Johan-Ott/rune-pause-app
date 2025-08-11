@@ -1,0 +1,17 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nordic Rune R (Raidho) - simplified outline version -->
+  <g fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main vertical staff -->
+    <line x1="8" y1="4" x2="8" y2="28"/>
+    
+    <!-- Upper curved section forming "P" shape -->
+    <path d="M8 4 L18 4 Q22 4 22 8 Q22 12 18 12 L8 12"/>
+    
+    <!-- Diagonal line from middle to bottom right (gives it R character) -->
+    <line x1="14" y1="12" x2="22" y2="28"/>
+    
+    <!-- Optional: small decorative marks (rune-like details) -->
+    <line x1="6" y1="8" x2="10" y2="8"/>
+    <line x1="6" y1="20" x2="10" y2="20"/>
+  </g>
+</svg>

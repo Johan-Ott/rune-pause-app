@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    ".",
+    "core/timer"
+]
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+serde = { version = "1", features = ["derive"] }
