@@ -1,6 +1,6 @@
 use tauri::menu::{Menu, MenuItem, Submenu};
 use tauri::tray::TrayIconEvent;
-use tauri::{App, AppHandle, Manager};
+use tauri::{App, AppHandle, Manager, Position, PhysicalPosition};
 
 pub fn build_tray_menu(app: &mut App) -> Result<Menu<tauri::Wry>, tauri::Error> {
     // Language submenu
@@ -28,6 +28,40 @@ pub fn handle_tray_event(app: &AppHandle, event: &TrayIconEvent) {
                 if window.is_visible().unwrap_or(false) {
                     let _ = window.hide();
                 } else {
+                    // Position window directly under system tray icon with proper DPI calculation
+                    if let Ok(monitor) = window.current_monitor() {
+                        if let Some(monitor) = monitor {
+                            let size = monitor.size();
+                            let scale_factor = monitor.scale_factor();
+                            let window_width = 400;
+                            let _window_height = 600;
+                            
+                            // Calculate logical screen dimensions
+                            let logical_width = size.width as f64 / scale_factor;
+                            
+                            // On macOS, system tray area is typically:
+                            // - Tray icons start around 150-200px from right edge (logical)
+                            // - But we need to position the LEFT edge of our window, not center
+                            
+                            let tray_area_from_right = 180.0; // Logical pixels from right edge to tray area
+                            
+                            // Position the LEFT edge of the window so it appears under tray
+                            // We want the center of our window to be under the tray icon
+                            let desired_window_center = logical_width - tray_area_from_right;
+                            let logical_x = desired_window_center - (window_width as f64 / 2.0);
+                            let logical_y = 24.0; // Just below menu bar
+                            
+                            // Convert back to physical pixels
+                            let x = (logical_x * scale_factor) as i32;
+                            let y = (logical_y * scale_factor) as i32;
+                            
+                            println!("Debug: logical_width={}, tray_area_from_right={}, desired_center={}, logical_x={}, final_x={}", 
+                                logical_width, tray_area_from_right, desired_window_center, logical_x, x);
+                            
+                            let _ = window.set_position(Position::Physical(PhysicalPosition { x, y }));
+                        }
+                    }
+                    
                     let _ = window.show();
                     let _ = window.set_focus();
                 }
@@ -66,7 +100,7 @@ pub fn handle_menu_event(app: &AppHandle, event: &tauri::menu::MenuEvent) {
 
 pub fn update_tray_timer(app: &AppHandle, timer_text: &str) -> Result<(), tauri::Error> {
     if let Some(tray) = app.tray_by_id("main") {
-        // Update tooltip
+        // Update tooltip with more detailed info
         tray.set_tooltip(Some(format!("Rune Pause - {}", timer_text)))?;
         
         // Update tray title (shows text next to icon on macOS)
@@ -74,6 +108,9 @@ pub fn update_tray_timer(app: &AppHandle, timer_text: &str) -> Result<(), tauri:
         {
             tray.set_title(Some(timer_text))?;
         }
+        
+        // You could also change the icon based on status here if needed
+        // For example, different icons for running, paused, stopped states
     }
     Ok(())
 }

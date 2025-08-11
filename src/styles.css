@@ -1,5 +1,10 @@
+/* Import Nordic Theme */
+@import './styles/nordic-theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+}

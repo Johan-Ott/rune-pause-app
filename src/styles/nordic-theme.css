@@ -1,0 +1,897 @@
+/* ========================================
+   NORDIC RUNE TIMER - THEME SYSTEM
+   ======================================== */
+
+/* === CSS CUSTOM PROPERTIES === */
+:root {
+  /* === NORDIC COLORS === */
+  --nordic-night: #0a0e1a;
+  --nordic-dusk: #111827;
+  --nordic-stone: #1f2937;
+  --nordic-mist: #374151;
+  --nordic-fog: #6b7280;
+  --nordic-ice: #d1d5db;
+  --nordic-snow: #f9fafb;
+
+  /* === MAGICAL NIGHT SKY COLORS === */
+  --sky-deep: #0f172a;
+  --sky-medium: #1e293b;
+  --sky-light: #334155;
+  --star-bright: #ffffff;
+  --star-dim: rgba(255, 255, 255, 0.4);
+
+  /* === AURORA COLORS === */
+  --aurora-blue: #3b82f6;
+  --aurora-cyan: #06b6d4;
+  --aurora-emerald: #10b981;
+  --aurora-purple: #8b5cf6;
+  --aurora-pink: #ec4899;
+
+  /* === RUNE ACCENT COLORS === */
+  --rune-blue: #60a5fa;
+  --rune-cyan: #22d3ee;
+  --rune-emerald: #34d399;
+  --rune-amber: #fbbf24;
+  --rune-rose: #fb7185;
+
+  /* === GLASS MORPHISM COLORS === */
+  --glass-white: rgba(255, 255, 255, 0.05);
+  --glass-blue: rgba(59, 130, 246, 0.08);
+  --glass-cyan: rgba(6, 182, 212, 0.08);
+  --glass-emerald: rgba(16, 185, 129, 0.08);
+  --glass-purple: rgba(139, 92, 246, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+
+  /* === TIMER SPECIFIC COLORS === */
+  --timer-idle: var(--rune-blue);
+  --timer-running: var(--rune-emerald);
+  --timer-paused: var(--rune-amber);
+  --timer-background: rgba(15, 23, 42, 0.8);
+  --timer-glass: rgba(255, 255, 255, 0.05);
+  --timer-text: #e2e8f0;
+
+  /* === MODERN UI COLORS === */
+  --background: #fafbfc;
+  --foreground: #0f172a;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --muted-foreground: #64748b;
+  --border: rgba(148, 163, 184, 0.12);
+
+  /* === GEOMETRIC PROPERTIES === */
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 0.75rem;
+  --border-radius-lg: 1rem;
+  --border-radius-xl: 1.5rem;
+
+  /* === ANIMATIONS === */
+  --animation-fast: 0.2s;
+  --animation-normal: 0.3s;
+  --animation-slow: 0.6s;
+}
+
+/* === DARK MODE OVERRIDES === */
+.dark {
+  --background: #0a0e1a;
+  --foreground: #f1f5f9;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --muted-foreground: #9ca3af;
+  --border: rgba(99, 102, 241, 0.15);
+}
+
+/* === BODY STYLING === */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.5s ease;
+}
+
+body.dark {
+  background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
+}
+
+body.system-tray {
+  background: transparent !important;
+}
+
+body.dark.system-tray {
+  background: transparent !important;
+}
+
+/* === SYSTEM TRAY POPOVER === */
+.system-tray-popover {
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: transparent;
+}
+
+/* === MODERN CONTAINER SYSTEM === */
+.modern-container {
+  background: #ffffff;
+  backdrop-filter: blur(16px) saturate(110%);
+  border: none;
+  box-shadow: none;
+}
+
+.dark .modern-container {
+  background: #111827;
+  backdrop-filter: blur(16px) saturate(110%);
+  border: none;
+  box-shadow: none;
+}
+
+/* === MODERN HEADER === */
+.modern-header {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%),
+    rgba(248, 250, 252, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.dark .modern-header {
+  background:
+    linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(59, 130, 246, 0.08) 100%),
+    rgba(31, 41, 55, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+}
+
+/* === MODERN INTERACTIVE ELEMENTS === */
+.modern-interactive {
+  background: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.modern-interactive:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(59, 130, 246, 0.2);
+  transform: translateY(-0.5px);
+}
+
+.dark .modern-interactive {
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+}
+
+.dark .modern-interactive:hover {
+  background: rgba(31, 41, 55, 0.7);
+  border-color: rgba(96, 165, 250, 0.3);
+  transform: translateY(-0.5px);
+}
+
+/* === MODERN SWITCH COMPONENT === */
+.modern-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.switch-track {
+  width: 44px;
+  height: 24px;
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.switch-thumb {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modern-switch.active .switch-track {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.modern-switch.active .switch-thumb {
+  transform: translateX(20px);
+}
+
+.dark .switch-track {
+  background: rgba(75, 85, 99, 0.4);
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+.dark .switch-thumb {
+  background: #f1f5f9;
+}
+
+/* === MODERN SELECT === */
+.modern-select {
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 6px;
+  color: var(--foreground);
+  transition: all 0.15s ease;
+}
+
+.modern-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark .modern-select {
+  background: rgba(31, 41, 55, 0.8);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: var(--foreground);
+}
+
+.dark .modern-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+/* === MODERN SLIDER === */
+.modern-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 2px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.modern-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.modern-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.modern-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.dark .modern-slider {
+  background: rgba(75, 85, 99, 0.4);
+}
+
+/* === NORDIC BUTTON STYLES === */
+.btn-nordic-outline {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  transition: all var(--animation-normal) ease;
+  cursor: pointer;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: transparent;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-nordic-outline:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-nordic-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dark .btn-nordic-outline {
+  border-color: rgba(96, 165, 250, 0.3);
+  color: var(--primary);
+}
+
+.dark .btn-nordic-outline:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+/* === UTILITY CLASSES === */
+.text-primary {
+  color: var(--primary);
+}
+.text-foreground {
+  color: var(--foreground);
+}
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+.border-border {
+  border-color: var(--border);
+}
+
+/* === NIGHT SKY BACKGROUND === */
+.night-sky {
+  position: relative;
+  min-height: 100vh;
+  background: 
+    /* Star field overlay */
+    radial-gradient(2px 2px at 20px 30px, var(--star-bright), transparent),
+    radial-gradient(2px 2px at 40px 70px, var(--star-dim), transparent),
+    radial-gradient(1px 1px at 90px 40px, var(--star-bright), transparent),
+    radial-gradient(1px 1px at 130px 80px, var(--star-dim), transparent),
+    radial-gradient(2px 2px at 160px 30px, var(--star-bright), transparent),
+    /* Aurora gradient layers */
+      linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(59, 130, 246, 0.03) 20%,
+        rgba(16, 185, 129, 0.05) 40%,
+        transparent 60%,
+        rgba(139, 92, 246, 0.03) 80%,
+        transparent 100%
+      ),
+    /* Base night sky gradient */
+      linear-gradient(180deg, var(--sky-deep) 0%, var(--sky-medium) 50%, var(--sky-light) 100%);
+  background-size:
+    200px 100px,
+    200px 100px,
+    200px 100px,
+    200px 100px,
+    200px 100px,
+    100% 100%,
+    100% 100%;
+  background-repeat: repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat;
+  animation: twinkle-stars 8s linear infinite;
+}
+
+@keyframes twinkle-stars {
+  0%,
+  100% {
+    background-position:
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%;
+  }
+  25% {
+    background-position:
+      -50px 0%,
+      0% 0%,
+      -30px 0%,
+      0% 0%,
+      -20px 0%,
+      0% 0%,
+      0% 0%;
+  }
+  50% {
+    background-position:
+      -100px 0%,
+      -50px 0%,
+      -60px 0%,
+      -30px 0%,
+      -40px 0%,
+      0% 0%,
+      0% 0%;
+  }
+  75% {
+    background-position:
+      -150px 0%,
+      -100px 0%,
+      -90px 0%,
+      -60px 0%,
+      -60px 0%,
+      0% 0%,
+      0% 0%;
+  }
+}
+
+/* === AURORA BOREALIS ANIMATION === */
+.aurora {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+  background: linear-gradient(
+    45deg,
+    transparent 20%,
+    rgba(59, 130, 246, 0.1) 40%,
+    rgba(16, 185, 129, 0.15) 60%,
+    transparent 80%
+  );
+  animation: aurora-flow 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes aurora-flow {
+  0%,
+  100% {
+    transform: translateX(-50%) skewX(-5deg);
+    opacity: 0.4;
+  }
+  33% {
+    transform: translateX(0%) skewX(5deg);
+    opacity: 0.7;
+  }
+  66% {
+    transform: translateX(50%) skewX(-2deg);
+    opacity: 0.5;
+  }
+}
+
+/* === GLASS MORPHISM EFFECTS === */
+.night-glass {
+  background: var(--glass-white);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 8px 32px var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.night-glass-ethereal {
+  background: linear-gradient(
+    135deg,
+    var(--glass-blue) 0%,
+    var(--glass-purple) 50%,
+    var(--glass-cyan) 100%
+  );
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.night-glass-mystical {
+  background: var(--glass-emerald);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow:
+    0 6px 24px rgba(16, 185, 129, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.night-glass-cosmic {
+  background: linear-gradient(45deg, var(--glass-purple) 0%, var(--glass-blue) 100%);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow:
+    0 16px 48px rgba(139, 92, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* === SHIMMER ANIMATIONS === */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* === HOVER EFFECTS === */
+.hover-glow {
+  transition: all var(--animation-normal) ease;
+}
+
+.hover-glow:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(59, 130, 246, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.hover-aurora {
+  transition: all var(--animation-normal) ease;
+  position: relative;
+}
+
+.hover-aurora::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    rgba(16, 185, 129, 0.1),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--animation-normal) ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.hover-aurora:hover::after {
+  opacity: 1;
+}
+
+/* === NORDIC BUTTON STYLES === */
+.btn-nordic {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  transition: all var(--animation-normal) ease;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-nordic-primary {
+  background: linear-gradient(135deg, var(--rune-blue), var(--rune-cyan));
+  color: white;
+  box-shadow: 0 4px 16px rgba(96, 165, 250, 0.3);
+}
+
+.btn-nordic-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
+}
+
+.btn-nordic-secondary {
+  background: var(--night-glass);
+  color: var(--nordic-ice);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+}
+
+.btn-nordic-secondary:hover {
+  background: var(--glass-blue);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.btn-nordic-ghost {
+  background: transparent;
+  color: var(--rune-blue);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.btn-nordic-ghost:hover {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: var(--rune-blue);
+}
+
+/* === TIMER SPECIFIC STYLES === */
+.timer-display {
+  background: var(--timer-background);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-xl);
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.timer-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    var(--glass-blue) 0%,
+    transparent 50%,
+    var(--glass-emerald) 100%
+  );
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.timer-text {
+  font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
+  font-size: 3rem;
+  font-weight: 600;
+  color: var(--timer-text);
+  text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.timer-status {
+  position: relative;
+  z-index: 1;
+  margin-top: 1rem;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.timer-status.idle {
+  color: var(--timer-idle);
+}
+.timer-status.running {
+  color: var(--timer-running);
+}
+.timer-status.paused {
+  color: var(--timer-paused);
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* === PROGRESS EFFECTS === */
+.progress-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid rgba(96, 165, 250, 0.2);
+  background: conic-gradient(
+    from 0deg,
+    var(--rune-blue) 0deg,
+    var(--rune-cyan) 90deg,
+    var(--rune-emerald) 180deg,
+    var(--rune-blue) 270deg,
+    var(--rune-blue) 360deg
+  );
+  opacity: 0.3;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* === MAGIC PARTICLES === */
+.magic-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 10% 20%, var(--glass-blue) 0px, transparent 2px),
+    radial-gradient(circle at 80% 80%, var(--glass-emerald) 0px, transparent 2px),
+    radial-gradient(circle at 40% 40%, var(--glass-purple) 0px, transparent 2px),
+    radial-gradient(circle at 90% 10%, rgba(34, 197, 94, 0.05) 0px, transparent 2px),
+    radial-gradient(circle at 60% 90%, rgba(59, 130, 246, 0.07) 0px, transparent 2px);
+  background-size:
+    200px 200px,
+    150px 150px,
+    300px 300px,
+    250px 250px,
+    180px 180px;
+  animation: float-particles 20s linear infinite;
+}
+
+@keyframes float-particles {
+  0%,
+  100% {
+    background-position:
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%,
+      0% 0%;
+  }
+  25% {
+    background-position:
+      -50px -20px,
+      30px 50px,
+      -20px 30px,
+      40px -30px,
+      20px 40px;
+  }
+  50% {
+    background-position:
+      -30px -50px,
+      60px 20px,
+      -40px 60px,
+      20px -60px,
+      50px 20px;
+  }
+  75% {
+    background-position:
+      -70px -30px,
+      20px 70px,
+      -60px 20px,
+      60px -20px,
+      30px 60px;
+  }
+}
+
+/* === RUNE GLOW EFFECTS === */
+.rune-glow {
+  filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.3));
+  animation: rune-pulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes rune-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.5));
+  }
+}
+
+/* === FADE IN ANIMATIONS === */
+.fade-in {
+  animation: fadeIn var(--animation-slow) ease-out;
+}
+
+.fade-in-delay-1 {
+  animation: fadeIn var(--animation-slow) ease-out 0.2s both;
+}
+
+.fade-in-delay-2 {
+  animation: fadeIn var(--animation-slow) ease-out 0.4s both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 640px) {
+  .timer-text {
+    font-size: 2rem;
+  }
+
+  .timer-display {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .timer-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-nordic {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .progress-ring {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* === UTILITY CLASSES === */
+.text-nordic-light {
+  color: var(--nordic-ice);
+}
+.text-nordic-muted {
+  color: var(--nordic-fog);
+}
+.text-rune-blue {
+  color: var(--rune-blue);
+}
+.text-rune-emerald {
+  color: var(--rune-emerald);
+}
+.text-rune-amber {
+  color: var(--rune-amber);
+}
+
+.bg-nordic-night {
+  background-color: var(--nordic-night);
+}
+.bg-nordic-dusk {
+  background-color: var(--nordic-dusk);
+}
+
+/* === ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === FOCUS STYLES === */
+.btn-nordic:focus-visible,
+.btn-nordic-outline:focus-visible {
+  outline: 2px solid var(--rune-blue);
+  outline-offset: 2px;
+}
+
+.modern-switch:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+  .night-glass,
+  .night-glass-ethereal,
+  .night-glass-mystical,
+  .night-glass-cosmic {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+}

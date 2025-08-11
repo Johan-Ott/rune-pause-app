@@ -1,59 +1,471 @@
 <script lang="ts">
-  import { env } from './env'
   import { onMount } from 'svelte'
-  import { open } from '@tauri-apps/api/shell'
-  import TimerPanel from './lib/components/TimerPanel.svelte';
-  let online = true
-  const version = '1.0.0'
+  import { writable } from 'svelte/store'
+  import { invoke } from '@tauri-apps/api/core'
+  import TimerPanel from './lib/components/TimerPanel.svelte'
 
-  function HelpIcon() {
-    // placeholder noop to satisfy TS when inlining SVG in slot
+  // Store for dark mode
+  const darkMode = writable(false)
+
+  // Timer state
+  let timerMinutes = 20
+  let timerRunning = false
+  let timerPaused = false
+  let timeLeft = 0
+  let smartChoice = true
+  let soundEnabled = false
+  let shortBreakInterval = 20
+  let longBreakInterval = 60
+  let statusUpdateInterval
+
+  // Calculate display time
+  $: displayMinutes = Math.floor(timeLeft / 60)
+  $: displaySeconds = timeLeft % 60
+  $: timeDisplay = `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`
+
+  // Apply dark mode
+  $: {
+    if ($darkMode) {
+      document.documentElement.classList.add('dark')
+      document.body.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      document.body.classList.remove('dark')
+    }
+    // Always apply system tray styling
+    document.body.classList.add('system-tray')
+  }
+
+  onMount(() => {
+    // Load settings from localStorage
+    const savedDarkMode = localStorage.getItem('nordic-timer-dark-mode')
+    if (savedDarkMode) {
+      darkMode.set(JSON.parse(savedDarkMode))
+    }
+
+    // Save dark mode changes
+    darkMode.subscribe((value) => {
+      localStorage.setItem('nordic-timer-dark-mode', JSON.stringify(value))
+    })
+
+    // Start status update loop
+    startStatusUpdates()
+  })
+
+  async function startStatusUpdates() {
+    statusUpdateInterval = setInterval(async () => {
+      try {
+        const status = await invoke('get_status')
+        updateUIFromStatus(status)
+      } catch (error) {
+        console.error('Failed to get timer status:', error)
+      }
+    }, 1000)
+  }
+
+  function updateUIFromStatus(status) {
+    timerRunning = status.is_running
+    timerPaused = status.is_paused
+
+    if (status.duration && status.elapsed_ms !== undefined) {
+      const totalMs = status.duration.secs * 1000 + Math.floor(status.duration.nanos / 1000000)
+      const remainingMs = Math.max(0, totalMs - status.elapsed_ms)
+      timeLeft = Math.ceil(remainingMs / 1000)
+
+      // Update system tray
+      updateSystemTray(status)
+    }
+  }
+
+  async function updateSystemTray(status) {
+    try {
+      const totalMs = status.duration
+        ? status.duration.secs * 1000 + Math.floor(status.duration.nanos / 1000000)
+        : 0
+      const progress = totalMs > 0 ? (status.elapsed_ms / totalMs) * 100 : 0
+
+      let icon = '⏹'
+      let statusText = 'Stopped'
+
+      if (timerRunning) {
+        if (timerPaused) {
+          icon = '⏸'
+          statusText = 'Paused'
+        } else {
+          icon = '▶️'
+          statusText = 'Running'
+        }
+      }
+
+      // Create progress bar with Unicode blocks
+      const progressChars = '▁▂▃▄▅▆▇█'
+      const progressBlocks = 8
+      const filledBlocks = Math.floor((progress / 100) * progressBlocks)
+      const progressBar = '█'.repeat(filledBlocks) + '░'.repeat(progressBlocks - filledBlocks)
+
+      const trayText = `${icon} ${timeDisplay} [${progressBar}] ${Math.round(progress)}%`
+
+      await invoke('update_tray_timer', { timerText: trayText })
+    } catch (error) {
+      console.error('Failed to update tray:', error)
+    }
+  }
+
+  async function toggleTimer() {
+    try {
+      if (timerRunning) {
+        if (timerPaused) {
+          // Resume timer
+          await invoke('resume_timer')
+        } else {
+          // Pause timer
+          await invoke('pause_timer')
+        }
+      } else {
+        // Start new timer
+        const durationMs = timerMinutes * 60 * 1000
+        await invoke('start_timer', { ms: durationMs })
+      }
+    } catch (error) {
+      console.error('Failed to toggle timer:', error)
+    }
+  }
+
+  async function stopTimer() {
+    try {
+      await invoke('stop_timer')
+      timeLeft = 0
+    } catch (error) {
+      console.error('Failed to stop timer:', error)
+    }
+  }
+
+  async function triggerBreak() {
+    try {
+      const durationMs = timerMinutes * 60 * 1000
+      await invoke('start_timer', { ms: durationMs })
+    } catch (error) {
+      console.error('Failed to start break timer:', error)
+    }
   }
 </script>
 
-<!-- Top status bar -->
-<div class="fixed top-0 left-0 right-0 h-6 flex items-center justify-between px-3 text-xs text-zinc-300">
-  <div class="flex items-center gap-2">
-    <span class="inline-flex items-center gap-1">
-      <span class="h-2 w-2 rounded-full {online ? 'bg-green-500' : 'bg-zinc-500'}"></span>
-      <span>{online ? 'Online' : 'Offline'}</span>
-    </span>
-  </div>
-  <div class="opacity-70">Tauri App v{version}</div>
-</div>
+<!-- System Tray Menu Interface -->
+<div class="system-tray-popover">
+  <div class="w-full max-w-sm mx-auto">
+    <div class="modern-container rounded-xl overflow-hidden">
+      <!-- Header with Rune and Dark Mode Toggle -->
+      <div class="modern-header p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex-1" />
 
-<!-- Center content -->
-<main class="grid place-items-center min-h-screen bg-zinc-950 text-zinc-50">
-  <section class="text-center select-none">
-    <div class="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-zinc-900/70 ring-1 ring-zinc-800">
-      <svg viewBox="0 0 100 100" class="h-9 w-9 opacity-90">
-        <rect x="0" y="0" width="100" height="100" rx="22" fill="none"/>
-        <path d="M10 55 Q 25 35 40 55 T 70 55 T 90 55" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      </svg>
+          <!-- Centered Nordic Rune R -->
+          <div class="text-3xl relative text-primary font-bold rune-glow">
+            <span class="relative">
+              ᚱ
+              <div class="absolute inset-0 text-primary opacity-30 blur-sm">ᚱ</div>
+            </span>
+          </div>
+
+          <!-- Dark Mode Toggle -->
+          <div class="flex-1 flex justify-end">
+            <div class="flex items-center gap-1">
+              <!-- Sun Icon -->
+              <svg
+                class="w-3 h-3 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="m12 2 0 2" />
+                <path d="m12 20 0 2" />
+                <path d="m4.93 4.93 1.41 1.41" />
+                <path d="m17.66 17.66 1.41 1.41" />
+                <path d="m2 12 2 0" />
+                <path d="m20 12 2 0" />
+                <path d="m6.34 17.66-1.41 1.41" />
+                <path d="m19.07 4.93-1.41 1.41" />
+              </svg>
+
+              <!-- Toggle Switch -->
+              <button
+                class="modern-switch scale-75 {$darkMode ? 'active' : ''}"
+                on:click={() => darkMode.update((n) => !n)}
+                role="switch"
+                aria-checked={$darkMode}
+              >
+                <div class="switch-track">
+                  <div class="switch-thumb"></div>
+                </div>
+              </button>
+
+              <!-- Moon Icon -->
+              <svg
+                class="w-3 h-3 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="mt-3 text-center">
+          {#if timerRunning}
+            <div class="flex items-center gap-2 justify-center">
+              <!-- Timer Icon -->
+              <svg
+                class="w-3 h-3 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12,6 12,12 16,14" />
+              </svg>
+              <p class="text-lg font-light tabular-nums text-foreground">
+                {timeDisplay}
+              </p>
+            </div>
+          {:else}
+            <div class="flex items-center gap-2 justify-center">
+              <!-- Power Icon -->
+              <svg
+                class="w-3 h-3 text-muted-foreground opacity-60"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 2v10" />
+                <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+              </svg>
+              <p class="text-sm text-muted-foreground">Timer redo</p>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-4 space-y-3">
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            class="btn-nordic-outline h-9 text-xs font-normal"
+            on:click={triggerBreak}
+            disabled={timerRunning}
+          >
+            <svg class="w-3 h-3 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="m9 12 4.5 2.5V9.5z" />
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+            </svg>
+            Vila nu
+          </button>
+
+          <button
+            class="btn-nordic-outline h-9 text-xs font-normal"
+            on:click={timerRunning ? stopTimer : toggleTimer}
+          >
+            {#if timerRunning}
+              <svg class="w-3 h-3 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="9" y="9" width="6" height="6" />
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+              </svg>
+              Stoppa
+            {:else}
+              <svg
+                class="w-3 h-3 mr-1.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 2v10" />
+                <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+              </svg>
+              Aktivera
+            {/if}
+          </button>
+        </div>
+
+        <!-- Settings Sections -->
+        <div class="space-y-3">
+          <!-- Smart Choice -->
+          <div class="space-y-2 py-2 border-t border-border/50">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <!-- Zap Icon -->
+                <svg
+                  class="w-4 h-4 text-muted-foreground"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M13 2 L3 14 h9 l-1 8 L21 10 h-9 l1-8z" />
+                </svg>
+                <label class="text-sm cursor-pointer">Smart val</label>
+              </div>
+              <button
+                class="modern-switch scale-75 {smartChoice ? 'active' : ''}"
+                on:click={() => (smartChoice = !smartChoice)}
+                role="switch"
+                aria-checked={smartChoice}
+              >
+                <div class="switch-track">
+                  <div class="switch-thumb"></div>
+                </div>
+              </button>
+            </div>
+
+            {#if smartChoice}
+              <div class="space-y-2 pl-6">
+                <select class="modern-select w-full p-2 text-xs rounded-lg">
+                  <option value="medium">Medium energi</option>
+                  <option value="low">Låg energi</option>
+                  <option value="high">Hög energi</option>
+                </select>
+
+                <div class="flex gap-1">
+                  <button
+                    class="flex-1 py-1.5 px-2 text-xs rounded-lg modern-interactive text-muted-foreground hover:text-foreground"
+                  >
+                    Vila
+                  </button>
+                  <button
+                    class="flex-1 py-1.5 px-2 text-xs rounded-lg modern-interactive text-muted-foreground hover:text-foreground"
+                  >
+                    Andning
+                  </button>
+                  <button
+                    class="flex-1 py-1.5 px-2 text-xs rounded-lg modern-interactive text-muted-foreground hover:text-foreground"
+                  >
+                    Stretch
+                  </button>
+                </div>
+              </div>
+            {/if}
+          </div>
+
+          <!-- Intervals -->
+          <div class="space-y-3 py-2 border-t border-border/50">
+            <div class="flex items-center space-x-2">
+              <!-- Activity Icon -->
+              <svg
+                class="w-4 h-4 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M22 12h-2.48a2 2 0 0 0-1.93 2.52l-1.35 4.87a1 1 0 0 1-1.93-.01L11.38 7a2 2 0 0 0-3.84.48l-.46 2.3A2 2 0 0 0 8.99 12H16"
+                />
+              </svg>
+              <label class="text-sm">Intervaller</label>
+            </div>
+
+            <div class="space-y-3 pl-6">
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs text-muted-foreground">Kort paus</label>
+                  <span class="text-xs font-medium text-primary">
+                    {shortBreakInterval} min
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="60"
+                  step="5"
+                  bind:value={shortBreakInterval}
+                  class="modern-slider w-full"
+                />
+              </div>
+
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs text-muted-foreground">Lång paus</label>
+                  <span class="text-xs font-medium text-primary">
+                    {longBreakInterval} min
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="30"
+                  max="120"
+                  step="15"
+                  bind:value={longBreakInterval}
+                  class="modern-slider w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Sound -->
+          <div class="space-y-2 py-2 border-t border-border/50">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                {#if soundEnabled}
+                  <!-- Volume On Icon -->
+                  <svg
+                    class="w-4 h-4 text-muted-foreground"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                {:else}
+                  <!-- Volume Off Icon -->
+                  <svg
+                    class="w-4 h-4 text-muted-foreground"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                  </svg>
+                {/if}
+                <label class="text-sm cursor-pointer">Ljud</label>
+              </div>
+              <button
+                class="modern-switch scale-75 {soundEnabled ? 'active' : ''}"
+                on:click={() => (soundEnabled = !soundEnabled)}
+                role="switch"
+                aria-checked={soundEnabled}
+              >
+                <div class="switch-track">
+                  <div class="switch-thumb"></div>
+                </div>
+              </button>
+            </div>
+
+            {#if soundEnabled}
+              <div class="pl-6">
+                <select class="modern-select w-full p-2 text-xs rounded-lg">
+                  <option value="wind">🌬️ Nordanvind</option>
+                  <option value="forest">🌲 Skogsrus</option>
+                  <option value="rain">🌧️ Regndroppar</option>
+                  <option value="silence">🤫 Tystnad</option>
+                </select>
+              </div>
+            {/if}
+          </div>
+        </div>
+      </div>
     </div>
-    <h1 class="text-xl font-semibold tracking-tight">Tauri Application</h1>
-    <p class="mt-2 text-sm text-zinc-400">Ready to build something amazing</p>
-  </section>
-  <!-- TimerPanel: system tray timer demo -->
-  <section class="mt-8">
-    <TimerPanel />
-  </section>
-  import TimerPanel from './lib/components/TimerPanel.svelte';
-
-  <!-- Footer -->
-  <footer class="fixed bottom-2 inset-x-0 text-center text-[11px] text-zinc-500">
-    Built with Tauri + Svelte
-  </footer>
-
-  <!-- Help FAB -->
-  <button
-    title="Help"
-    class="fixed bottom-4 right-4 h-9 w-9 grid place-items-center rounded-full bg-zinc-900/70 ring-1 ring-zinc-800 hover:bg-zinc-800/70 transition"
-    on:click={() => open('https://tauri.app')}
-  >
-    <svg viewBox="0 0 24 24" class="h-5 w-5">
-      <path d="M12 17v-2m0-1a3 3 0 1 0-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7" fill="none"/>
-    </svg>
-  </button>
-</main>
+  </div>
+</div>

@@ -16,9 +16,18 @@ fn main() {
   tauri::Builder::default()
     .manage(AppState::default())
     .on_window_event(|window, event| {
-      if let WindowEvent::CloseRequested { api, .. } = event {
-        let _ = window.hide();
-        api.prevent_close();
+      match event {
+        WindowEvent::CloseRequested { api, .. } => {
+          let _ = window.hide();
+          api.prevent_close();
+        }
+        WindowEvent::Focused(focused) => {
+          // Hide window when it loses focus (typical tray popover behavior)
+          if !focused {
+            let _ = window.hide();
+          }
+        }
+        _ => {}
       }
     })
     .invoke_handler(tauri::generate_handler![
@@ -27,7 +36,9 @@ fn main() {
       commands::resume_timer,
       commands::stop_timer,
       commands::get_status,
-      commands::update_tray_timer
+      commands::update_tray_timer,
+      commands::show_fullscreen_pause,
+      commands::close_fullscreen_pause
     ])
     .setup(|app| {
       #[cfg(target_os = "macos")]
@@ -40,7 +51,7 @@ fn main() {
       let menu = tray::build_tray_menu(app)?;
       
       let tray_builder = TrayIconBuilder::with_id("main")
-        .tooltip("Rune Pause - 00:00")
+        .tooltip("Rune Pause - Ready")
         .icon_as_template(true) // Better for macOS dark/light mode
         .menu(&menu)
         .on_tray_icon_event(|tray, event| {
@@ -51,7 +62,7 @@ fn main() {
         });
       
       #[cfg(target_os = "macos")]
-      let tray_builder = tray_builder.title("⏹ 00:00");
+      let tray_builder = tray_builder.title("⏹ Ready");
       
       let _tray = tray_builder.build(app)?;
 

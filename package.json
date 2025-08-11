@@ -58,7 +58,7 @@
     "zod": "^3.23.8"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.5.3"
+    "@tauri-apps/api": "^2.7.0"
   },
   "lint-staged": {
     "*.{ts,svelte,js,cjs,mjs}": [

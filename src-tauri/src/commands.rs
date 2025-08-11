@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{State, Manager};
 use crate::state::AppState;
 use crate::timer;
 use crate::tray;
@@ -31,4 +31,45 @@ pub fn get_status(state: State<AppState>) -> crate::state::TimerState {
 #[tauri::command]
 pub fn update_tray_timer(app: tauri::AppHandle, timer_text: String) -> Result<(), String> {
     tray::update_tray_timer(&app, &timer_text).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn show_fullscreen_pause(app: tauri::AppHandle, pause_type: String, duration: u32, sound_enabled: bool, sound_type: String) -> Result<(), String> {
+    if let Some(main_window) = app.get_webview_window("main") {
+        // Switch to fullscreen mode
+        main_window.set_fullscreen(true).map_err(|e| e.to_string())?;
+        main_window.set_always_on_top(true).map_err(|e| e.to_string())?;
+        main_window.show().map_err(|e| e.to_string())?;
+        main_window.set_focus().map_err(|e| e.to_string())?;
+        
+        // Send pause config to frontend via JavaScript evaluation
+        let script = format!(r#"
+            window.startFullscreenPause({{
+                type: "{}",
+                duration: {},
+                soundEnabled: {},
+                soundType: "{}"
+            }});
+        "#, pause_type, duration, sound_enabled, sound_type);
+        
+        main_window.eval(&script).map_err(|e| e.to_string())?;
+    }
+    
+    Ok(())
+}
+
+#[tauri::command]
+pub fn close_fullscreen_pause(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(main_window) = app.get_webview_window("main") {
+        // Exit fullscreen and hide window
+        main_window.set_fullscreen(false).map_err(|e| e.to_string())?;
+        main_window.set_always_on_top(true).map_err(|e| e.to_string())?; // Keep always on top for tray
+        main_window.hide().map_err(|e| e.to_string())?;
+        
+        // Tell frontend to exit pause mode
+        let script = "window.exitFullscreenPause && window.exitFullscreenPause();";
+        let _ = main_window.eval(script);
+    }
+    
+    Ok(())
 }

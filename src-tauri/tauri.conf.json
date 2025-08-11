@@ -10,13 +10,24 @@
     "beforeBuildCommand": "pnpm build"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
-        "title": "rune-pause",
-        "width": 800,
+        "title": "Nordic Rune Timer",
+        "width": 400,
         "height": 600,
-        "resizable": true,
-        "fullscreen": false
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "center": false,
+        "x": 100,
+        "y": 100,
+        "shadow": false,
+        "titleBarStyle": "Transparent"
       }
     ],
     "security": {
