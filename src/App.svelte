@@ -2,7 +2,6 @@
   import { onMount } from 'svelte'
   import { writable } from 'svelte/store'
   import { invoke } from '@tauri-apps/api/core'
-  import TimerPanel from './lib/components/TimerPanel.svelte'
 
   // Store for dark mode
   const darkMode = writable(false)
@@ -17,11 +16,11 @@
   let shortBreakInterval = 20
   let longBreakInterval = 60
   let statusUpdateInterval
-
-  // Calculate display time
-  $: displayMinutes = Math.floor(timeLeft / 60)
-  $: displaySeconds = timeLeft % 60
-  $: timeDisplay = `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`
+  
+  // Notification tracking
+  let lastNotificationTime = 0
+  let shortBreakNotified = false
+  let longBreakNotified = false
 
   // Apply dark mode
   $: {
@@ -72,46 +71,45 @@
       const remainingMs = Math.max(0, totalMs - status.elapsed_ms)
       timeLeft = Math.ceil(remainingMs / 1000)
 
-      // Update system tray
-      updateSystemTray(status)
+      // Check for break notifications
+      checkBreakNotifications(timeLeft)
     }
   }
 
-  async function updateSystemTray(status) {
+  async function checkBreakNotifications(timeLeftSeconds) {
+    if (!timerRunning || timerPaused) {
+      // Reset notification flags when timer is not running
+      shortBreakNotified = false
+      longBreakNotified = false
+      return
+    }
+
+    // Mini break notification (10 seconds before)
+    if (timeLeftSeconds === 10 && !shortBreakNotified) {
+      await sendNotification('🌸 Mini Break kommer snart', 'Ta en kort paus om 10 sekunder')
+      shortBreakNotified = true
+    }
+
+    // Long break notification (30 seconds before) 
+    if (timeLeftSeconds === 30 && !longBreakNotified) {
+      await sendNotification('🌿 Lång paus kommer snart', 'Dags för en längre vila om 30 sekunder')
+      longBreakNotified = true
+    }
+  }
+
+  async function sendNotification(title, body) {
     try {
-      const totalMs = status.duration
-        ? status.duration.secs * 1000 + Math.floor(status.duration.nanos / 1000000)
-        : 0
-      const progress = totalMs > 0 ? (status.elapsed_ms / totalMs) * 100 : 0
-
-      let icon = '⏹'
-      let statusText = 'Stopped'
-
-      if (timerRunning) {
-        if (timerPaused) {
-          icon = '⏸'
-          statusText = 'Paused'
-        } else {
-          icon = '▶️'
-          statusText = 'Running'
-        }
-      }
-
-      // Create progress bar with Unicode blocks
-      const progressChars = '▁▂▃▄▅▆▇█'
-      const progressBlocks = 8
-      const filledBlocks = Math.floor((progress / 100) * progressBlocks)
-      const progressBar = '█'.repeat(filledBlocks) + '░'.repeat(progressBlocks - filledBlocks)
-
-      const trayText = `${icon} ${timeDisplay} [${progressBar}] ${Math.round(progress)}%`
-
-      await invoke('update_tray_timer', { timerText: trayText })
+      await invoke('send_notification', { title, body })
     } catch (error) {
-      console.error('Failed to update tray:', error)
+      console.error('Failed to send notification:', error)
     }
   }
 
   async function toggleTimer() {
+    // Reset notification flags when starting a new timer
+    shortBreakNotified = false
+    longBreakNotified = false
+    
     try {
       if (timerRunning) {
         if (timerPaused) {
@@ -135,6 +133,9 @@
     try {
       await invoke('stop_timer')
       timeLeft = 0
+      // Reset notification flags
+      shortBreakNotified = false
+      longBreakNotified = false
     } catch (error) {
       console.error('Failed to stop timer:', error)
     }
@@ -144,6 +145,9 @@
     try {
       const durationMs = timerMinutes * 60 * 1000
       await invoke('start_timer', { ms: durationMs })
+      // Reset notification flags for new break timer
+      shortBreakNotified = false
+      longBreakNotified = false
     } catch (error) {
       console.error('Failed to start break timer:', error)
     }
@@ -215,42 +219,10 @@
           </div>
         </div>
 
-        <!-- Timer Display -->
-        <div class="mt-3 text-center">
-          {#if timerRunning}
-            <div class="flex items-center gap-2 justify-center">
-              <!-- Timer Icon -->
-              <svg
-                class="w-3 h-3 text-muted-foreground"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12,6 12,12 16,14" />
-              </svg>
-              <p class="text-lg font-light tabular-nums text-foreground">
-                {timeDisplay}
-              </p>
-            </div>
-          {:else}
-            <div class="flex items-center gap-2 justify-center">
-              <!-- Power Icon -->
-              <svg
-                class="w-3 h-3 text-muted-foreground opacity-60"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M12 2v10" />
-                <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
-              </svg>
-              <p class="text-sm text-muted-foreground">Timer redo</p>
-            </div>
-          {/if}
-        </div>
+        <!-- Timer Display removed - will use system notifications instead -->
+        <!-- Notifications will appear for: -->
+        <!-- - 10 seconds before mini break -->
+        <!-- - 30 seconds before long break -->
       </div>
 
       <!-- Main Content -->

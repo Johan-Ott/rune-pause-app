@@ -1,7 +1,6 @@
 use tauri::{State, Manager};
 use crate::state::AppState;
 use crate::timer;
-use crate::tray;
 
 #[tauri::command]
 pub fn start_timer(state: State<AppState>, ms: u64) {
@@ -29,8 +28,22 @@ pub fn get_status(state: State<AppState>) -> crate::state::TimerState {
 }
 
 #[tauri::command]
-pub fn update_tray_timer(app: tauri::AppHandle, timer_text: String) -> Result<(), String> {
-    tray::update_tray_timer(&app, &timer_text).map_err(|e| e.to_string())
+pub fn send_notification(app: tauri::AppHandle, title: String, body: String) -> Result<(), String> {
+    use tauri_plugin_notification::NotificationExt;
+    
+    app.notification()
+        .builder()
+        .title(title)
+        .body(body)
+        .show()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn update_tray_timer(_app: tauri::AppHandle, _timer_text: String) -> Result<(), String> {
+    // Remove timer from tray - we use notifications instead
+    Ok(())
 }
 
 #[tauri::command]
